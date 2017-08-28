@@ -15,16 +15,16 @@ find_package(Eigen REQUIRED)
 find_package(yaml-cpp)
 find_package(lcm)
 
-add_library(RemoteTreeViewerWrapper SHARED RemoteTreeViewerWrapper.cpp)
+add_library(RemoteTreeViewerWrapper SHARED src/RemoteTreeViewerWrapper.cpp)
 # target_link_libraries(RemoteTreeViewerWrapper lcm drakeRBM drakeJoints drakeShapes drakeCommon z pthread)
 target_link_libraries(RemoteTreeViewerWrapper
 	lcm
 	z
 	pthread)
 install(TARGETS RemoteTreeViewerWrapper DESTINATION lib)
-install(FILES RemoteTreeViewerWrapper.hpp DESTINATION include)
+install(FILES src/RemoteTreeViewerWrapper.hpp DESTINATION include)
 
-add_executable(testRemoteTreeViewerWrapper testRemoteTreeViewerWrapper.cpp)
+add_executable(testRemoteTreeViewerWrapper src/testRemoteTreeViewerWrapper.cpp)
 target_link_libraries(testRemoteTreeViewerWrapper
 	lcm
 	yaml-cpp
