@@ -16,21 +16,35 @@ find_package(yaml-cpp)
 find_package(lcm REQUIRED)
 #include_directories(${LCM_INCLUDE_DIRS})
 
+set(HEADERS
+		include/
+		src/
+		)
+set(SOURCES
+		src/RemoteTreeViewerWrapper.cpp)
+set(PUBLIC_HEADERS
+		include/)
 
-add_library(RemoteTreeViewerWrapper SHARED src/RemoteTreeViewerWrapper.cpp)
+add_library(RemoteTreeViewerWrapper SHARED ${SOURCES})
+#set_target_properties(RemoteTreeViewerWrapper
+#											PROPERTIES PUBLIC_HEADER ${PUBLIC_HEADERS})
+target_include_directories(RemoteTreeViewerWrapper PUBLIC ${HEADERS})
 target_link_libraries(RemoteTreeViewerWrapper
 	lcm
 	z
 	pthread)
-install(TARGETS RemoteTreeViewerWrapper DESTINATION lib)
-install(FILES src/RemoteTreeViewerWrapper.hpp DESTINATION include)
+
+install(TARGETS RemoteTreeViewerWrapper
+				LIBRARY DESTINATION lib)
+install(DIRECTORY ${PUBLIC_HEADERS} DESTINATION include)
 
 add_executable(testRemoteTreeViewerWrapper src/testRemoteTreeViewerWrapper.cpp)
+target_include_directories(testRemoteTreeViewerWrapper PUBLIC
+													${PUBLIC_HEADERS})
 target_link_libraries(testRemoteTreeViewerWrapper
-	lcm
 	yaml-cpp
-	z
-	pthread
 	RemoteTreeViewerWrapper)
 
-install(TARGETS testRemoteTreeViewerWrapper DESTINATION bin)
+
+install(TARGETS testRemoteTreeViewerWrapper
+				RUNTIME DESTINATION bin)

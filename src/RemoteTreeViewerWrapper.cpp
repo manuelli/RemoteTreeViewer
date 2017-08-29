@@ -1,14 +1,14 @@
-#include "RemoteTreeViewerWrapper.hpp"
-
+// system
 #include <string>
 #include <stdexcept>
 #include <iostream>
 #include <random>
 #include <unistd.h>
+
+// RemoteTreeViewer
 #include "json.hpp"
-
 #include "viewer2_comms_t.hpp"
-
+#include "RemoteTreeViewer/RemoteTreeViewerWrapper.hpp"
 using namespace std;
 using namespace Eigen;
 //using namespace drake::lcm;
@@ -16,50 +16,53 @@ using namespace Eigen;
 using json = nlohmann::json;
 using namespace robotlocomotion;
 
-static double getUnixTime(void)
-{
-    struct timespec tv;
+namespace RemoteTreeViewer {
 
-    if(clock_gettime(CLOCK_REALTIME, &tv) != 0) return 0;
+static double getUnixTime(void) {
+  struct timespec tv;
 
-    return (tv.tv_sec + (tv.tv_nsec / 1000000000.0));
+  if (clock_gettime(CLOCK_REALTIME, &tv) != 0) return 0;
+
+  return (tv.tv_sec + (tv.tv_nsec / 1000000000.0));
 }
 
 RemoteTreeViewerWrapper::RemoteTreeViewerWrapper() {
 }
 
-void RemoteTreeViewerWrapper::publishPointCloud(const Matrix3Xd& pts, const vector<string>& path, const vector<vector<double>>& color){
+void RemoteTreeViewerWrapper::publishPointCloud(const Matrix3Xd &pts,
+                                                const vector <string> &path,
+                                                const vector <vector<double>> &color) {
   long long int now = getUnixTime() * 1000 * 1000;
   // Format a JSON string for this pointcloud
   json j = {
-    {"timestamp", now},
-    {"setgeometry", 
-      {{
-        {"path", path},
-        {"geometry",
-          {
-            {"type", "pointcloud"},
-            {"points", vector<vector<double>>()},
-            {"channels",
-              {
-                {"rgb", vector<vector<double>>()}
-              }
+      {"timestamp", now},
+      {"setgeometry",
+       {{
+            {"path", path},
+            {"geometry",
+             {
+                 {"type", "pointcloud"},
+                 {"points", vector < vector < double >> ()},
+                 {"channels",
+                  {
+                      {"rgb", vector < vector < double >> ()}
+                  }
+                 }
+             }
             }
-          }
-        }
-      }},
-    },
-    {"settransform", json({})},
-    {"delete", json({})}
+        }},
+      },
+      {"settransform", json({})},
+      {"delete", json({})}
   };
 
   // Push in the points and colors.
-  for (int i=0; i<pts.cols(); i++){
-    j["setgeometry"][0]["geometry"]["points"].push_back( {pts(0, i), pts(1, i), pts(2, i)} );
+  for (int i = 0; i < pts.cols(); i++) {
+    j["setgeometry"][0]["geometry"]["points"].push_back({pts(0, i), pts(1, i), pts(2, i)});
     if (color.size() == 1)
-      j["setgeometry"][0]["geometry"]["channels"]["rgb"].push_back( color[0] );
+      j["setgeometry"][0]["geometry"]["channels"]["rgb"].push_back(color[0]);
     else if (color.size() == pts.cols())
-      j["setgeometry"][0]["geometry"]["channels"]["rgb"].push_back( color[i] );
+      j["setgeometry"][0]["geometry"]["channels"]["rgb"].push_back(color[i]);
     else if (color.size() != 0)
       printf("Color does not have right number of entries: %ld vs %ld\n", color.size(), pts.cols());
   }
@@ -70,36 +73,36 @@ void RemoteTreeViewerWrapper::publishPointCloud(const Matrix3Xd& pts, const vect
   msg.format_version_major = 1;
   msg.format_version_minor = 0;
   msg.data.clear();
-  for (auto& c : j.dump())
+  for (auto &c : j.dump())
     msg.data.push_back(c);
   msg.num_bytes = j.dump().size();
   // Use channel 0 for remote viewer communications.
   lcm_.publish("DIRECTOR_TREE_VIEWER_REQUEST_<0>", &msg);
 }
 
-void RemoteTreeViewerWrapper::publishLine(const Matrix3Xd& pts, const vector<string>& path) {
+void RemoteTreeViewerWrapper::publishLine(const Matrix3Xd &pts, const vector <string> &path) {
   long long int now = getUnixTime() * 1000 * 1000;
   // Format a JSON string for this pointcloud
   json j = {
-    {"timestamp", now},
-    {"setgeometry", 
-      {{
-        {"path", path},
-        {"geometry",
-          {
-            {"type", "line"},
-            {"points", vector<vector<double>>()},
-          }
-        }
-      }},
-    },
-    {"settransform", json({})},
-    {"delete", json({})}
+      {"timestamp", now},
+      {"setgeometry",
+       {{
+            {"path", path},
+            {"geometry",
+             {
+                 {"type", "line"},
+                 {"points", vector < vector < double >> ()},
+             }
+            }
+        }},
+      },
+      {"settransform", json({})},
+      {"delete", json({})}
   };
 
   // Push in the points and colors.
-  for (int i=0; i<pts.cols(); i++){
-    j["setgeometry"][0]["geometry"]["points"].push_back( {pts(0, i), pts(1, i), pts(2, i)} );
+  for (int i = 0; i < pts.cols(); i++) {
+    j["setgeometry"][0]["geometry"]["points"].push_back({pts(0, i), pts(1, i), pts(2, i)});
   }
 
   auto msg = viewer2_comms_t();
@@ -108,40 +111,42 @@ void RemoteTreeViewerWrapper::publishLine(const Matrix3Xd& pts, const vector<str
   msg.format_version_major = 1;
   msg.format_version_minor = 0;
   msg.data.clear();
-  for (auto& c : j.dump())
+  for (auto &c : j.dump())
     msg.data.push_back(c);
   msg.num_bytes = j.dump().size();
   // Use channel 0 for remote viewer communications.
   lcm_.publish("DIRECTOR_TREE_VIEWER_REQUEST_<0>", &msg);
 }
 
-void RemoteTreeViewerWrapper::publishRawMesh(const Matrix3Xd& verts, const std::vector<Vector3i>& tris, const vector<string>& path) {
+void RemoteTreeViewerWrapper::publishRawMesh(const Matrix3Xd &verts,
+                                             const std::vector<Vector3i> &tris,
+                                             const vector <string> &path) {
   long long int now = getUnixTime() * 1000 * 1000;
   json j = {
-    {"timestamp", now},
-    {"setgeometry", 
-      {{
-        {"path", path},
-        {"geometry",
-          {
-            {"type", "mesh_data"},
-            {"vertices", vector<vector<double>>()},
-            {"faces", vector<vector<int>>()}
-          }
-        }
-      }},
-    },
-    {"settransform", json({})},
-    {"delete", json({})}
+      {"timestamp", now},
+      {"setgeometry",
+       {{
+            {"path", path},
+            {"geometry",
+             {
+                 {"type", "mesh_data"},
+                 {"vertices", vector < vector < double >> ()},
+                 {"faces", vector < vector < int >> ()}
+             }
+            }
+        }},
+      },
+      {"settransform", json({})},
+      {"delete", json({})}
   };
-  
+
   // Push in the points.
-  for (int i=0; i<verts.cols(); i++){
-    j["setgeometry"][0]["geometry"]["vertices"].push_back( {verts(0, i), verts(1, i), verts(2, i)} );
+  for (int i = 0; i < verts.cols(); i++) {
+    j["setgeometry"][0]["geometry"]["vertices"].push_back({verts(0, i), verts(1, i), verts(2, i)});
   }
   // Push in the triangle indices.
-  for (int i=0; i<tris.size(); i++){
-    j["setgeometry"][0]["geometry"]["faces"].push_back( {tris[i][0], tris[i][1], tris[i][2]} );
+  for (int i = 0; i < tris.size(); i++) {
+    j["setgeometry"][0]["geometry"]["faces"].push_back({tris[i][0], tris[i][1], tris[i][2]});
   }
 
   auto msg = viewer2_comms_t();
@@ -150,7 +155,7 @@ void RemoteTreeViewerWrapper::publishRawMesh(const Matrix3Xd& verts, const std::
   msg.format_version_major = 1;
   msg.format_version_minor = 0;
   msg.data.clear();
-  for (auto& c : j.dump())
+  for (auto &c : j.dump())
     msg.data.push_back(c);
   msg.num_bytes = j.dump().size();
   // Use channel 0 for remote viewer communications.
@@ -293,3 +298,5 @@ void RemoteTreeViewerWrapper::publishRawMesh(const Matrix3Xd& verts, const std::
 //  // Use channel 0 for remote viewer communications.
 //  lcm_.publish("DIRECTOR_TREE_VIEWER_REQUEST_<0>", &msg);
 //}
+
+}// RemoteTreeViewer

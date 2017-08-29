@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "RemoteTreeViewerWrapper.hpp"
+#include "RemoteTreeViewer/RemoteTreeViewerWrapper.hpp"
 
 using namespace std;
 using namespace Eigen;
@@ -10,6 +10,7 @@ static inline double randrange(double min, double max){
 }
 
 int main(int argc, char ** argv){
+    using namespace RemoteTreeViewer;
 	RemoteTreeViewerWrapper rm;
 
 	int n_points = 1000;
