@@ -9,6 +9,7 @@
 #include "json.hpp"
 #include "viewer2_comms_t.hpp"
 #include "RemoteTreeViewer/RemoteTreeViewerWrapper.hpp"
+
 using namespace std;
 using namespace Eigen;
 //using namespace drake::lcm;
