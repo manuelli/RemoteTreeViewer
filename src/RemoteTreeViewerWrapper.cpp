@@ -220,8 +220,6 @@ void RemoteTreeViewerWrapper::publishGeometryContainer(RemoteTreeViewer::geometr
   json single_set_transform_command =  {{"path", path}, {"transform", transform_json} };
   j["settransform"] ={ single_set_transform_command } ;
 
-  //
-  std::vector<std::string> tmp_path;
 
   // add all the geometries
   auto basic_json = nlohmann::basic_json<>();
@@ -230,11 +228,6 @@ void RemoteTreeViewerWrapper::publishGeometryContainer(RemoteTreeViewer::geometr
     std::shared_ptr<RemoteTreeViewer::geometry::Geometry> geom = container.geometries_[i];
     json geom_json = geom->getJsonString();
 
-    // set the path
-    tmp_path = path;
-    std::string geometry_name = "geometry " + std::to_string(i);
-    tmp_path.push_back(geometry_name);
-    geom_json["path"] = tmp_path;
     json_array.push_back(geom_json);
   }
 

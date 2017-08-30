@@ -19,13 +19,31 @@ class Geometry{
  public:
   std::vector<double> color_;
   double alpha_;
+  std::string name_ = "";
+
   virtual json getJsonString() = 0;
   void setColor(std::vector<double> color){
     this->color_ = color;
   }
 
+  std::vector<double> getColor(){
+    return this->color_;
+  }
+
   void setAlpha(double alpha){
     this->alpha_ = alpha;
+  }
+
+  double getAlpha(){
+    return this->alpha_;
+  }
+
+  void setName(std::string name){
+    this->name_ = name;
+  }
+
+  std::string getName(){
+    return this->name_;
   }
 };
 
