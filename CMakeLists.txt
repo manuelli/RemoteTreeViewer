@@ -21,7 +21,8 @@ set(HEADERS
 		src/
 		)
 set(SOURCES
-		src/RemoteTreeViewerWrapper.cpp)
+		src/RemoteTreeViewerWrapper.cpp
+		src/geometry.cc)
 set(PUBLIC_HEADERS
 		include/)
 

@@ -6,9 +6,9 @@
 #include <unistd.h>
 
 // RemoteTreeViewer
-#include "json.hpp"
 #include "viewer2_comms_t.hpp"
 #include "RemoteTreeViewer/RemoteTreeViewerWrapper.hpp"
+#include "RemoteTreeViewer/json.hpp"
 
 using namespace std;
 using namespace Eigen;
@@ -27,7 +27,20 @@ static double getUnixTime(void) {
   return (tv.tv_sec + (tv.tv_nsec / 1000000000.0));
 }
 
+json makeDefaultJsonDictionary(){
+  long long int now = getUnixTime() * 1000 * 1000;
+  // default json dict
+  json j = {
+      {"timestamp", now},
+      {"setgeometry",json({})},
+      {"settransform", json({})},
+      {"delete", json({})}
+  };
+  return j;
+}
+
 RemoteTreeViewerWrapper::RemoteTreeViewerWrapper() {
+  this->publish_channel_ = "DIRECTOR_TREE_VIEWER_REQUEST_<0>";
 }
 
 void RemoteTreeViewerWrapper::publishPointCloud(const Matrix3Xd &pts,
@@ -79,6 +92,21 @@ void RemoteTreeViewerWrapper::publishPointCloud(const Matrix3Xd &pts,
   msg.num_bytes = j.dump().size();
   // Use channel 0 for remote viewer communications.
   lcm_.publish("DIRECTOR_TREE_VIEWER_REQUEST_<0>", &msg);
+}
+
+void RemoteTreeViewerWrapper::publishJson(json j){
+  long long int now = getUnixTime() * 1000 * 1000;
+  auto msg = viewer2_comms_t();
+  msg.utime = now;
+  msg.format = "treeviewer_json";
+  msg.format_version_major = 1;
+  msg.format_version_minor = 0;
+  msg.data.clear();
+  for (auto &c : j.dump())
+    msg.data.push_back(c);
+  msg.num_bytes = j.dump().size();
+  // Use channel 0 for remote viewer communications.
+  lcm_.publish(this->publish_channel_, &msg);
 }
 
 void RemoteTreeViewerWrapper::publishLine(const Matrix3Xd &pts, const vector <string> &path) {
@@ -161,6 +189,59 @@ void RemoteTreeViewerWrapper::publishRawMesh(const Matrix3Xd &verts,
   msg.num_bytes = j.dump().size();
   // Use channel 0 for remote viewer communications.
   lcm_.publish("DIRECTOR_TREE_VIEWER_REQUEST_<0>", &msg);
+}
+
+void RemoteTreeViewerWrapper::deletePath(const std::vector <std::string> &path){
+  long long int now = getUnixTime() * 1000 * 1000;
+
+  json j = {
+      {"timestamp", now},
+      {"setgeometry",json({})},
+      {"settransform", json({})},
+      {"delete", json({})}
+      // list of delete commands
+  };
+
+  j["delete"] = { {{"path", path}} };
+  j["list"] = {0,1,2};
+
+  this->publishJson(j);
+
+}
+
+void RemoteTreeViewerWrapper::publishGeometryContainer(RemoteTreeViewer::geometry::GeometryContainer& container, const std::vector <std::string> &path){
+
+  // default json dict
+  json j = makeDefaultJsonDictionary();
+
+  Eigen::Affine3f transform = container.getTransform();
+  json transform_json = RemoteTreeViewer::geometry::transformToJson(transform);
+  json transform_path = path;
+  json single_set_transform_command =  {{"path", path}, {"transform", transform_json} };
+  j["settransform"] ={ single_set_transform_command } ;
+
+  //
+  std::vector<std::string> tmp_path;
+
+  // add all the geometries
+  auto basic_json = nlohmann::basic_json<>();
+  auto json_array = basic_json.array();
+  for(int i = 0; i < container.geometries_.size(); i++){
+    std::shared_ptr<RemoteTreeViewer::geometry::Geometry> geom = container.geometries_[i];
+    json geom_json = geom->getJsonString();
+
+    // set the path
+    tmp_path = path;
+    std::string geometry_name = "geometry " + std::to_string(i);
+    tmp_path.push_back(geometry_name);
+    geom_json["path"] = tmp_path;
+    json_array.push_back(geom_json);
+  }
+
+  json single_geometry_message = {{"path", path}, {"geometries", json_array}};
+  j["setgeometry"] = {single_geometry_message};
+
+  this->publishJson(j);
 }
 
 //void RemoteTreeViewerWrapper::publishRigidBodyTree(const RigidBodyTree<double>& tree, const VectorXd& q, const Vector4d& color, const vector<string>& path, bool visual){

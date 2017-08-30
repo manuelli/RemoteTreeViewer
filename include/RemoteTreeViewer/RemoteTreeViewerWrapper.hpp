@@ -6,12 +6,21 @@
 //Eigen
 #include <Eigen/Dense>
 
+//RemoteTreeViewer
+#include "RemoteTreeViewer/geometry.h"
+#include "RemoteTreeViewer/json.hpp"
+
+
 namespace RemoteTreeViewer {
+using json = nlohmann::json;
 
 class RemoteTreeViewerWrapper {
  public:
   lcm::LCM lcm_;
   RemoteTreeViewerWrapper();
+
+  void publishJson(json j);
+
   void publishPointCloud(
       const Eigen::Matrix3Xd &pts,
       const std::vector <std::string> &path,
@@ -23,6 +32,21 @@ class RemoteTreeViewerWrapper {
       const Eigen::Matrix3Xd &verts,
       const std::vector <Eigen::Vector3i> &tris,
       const std::vector <std::string> &path);
+
+  void deletePath(const std::vector <std::string> &path);
+
+  void publishGeometryContainer(RemoteTreeViewer::geometry::GeometryContainer& container, const std::vector <std::string> &path);
+
+  static std::vector<std::string> makePath(std::vector<std::string> path_1, std::string path_2){
+    path_1.push_back(path_2);
+    return path_1;
+  }
+
+  static std::vector<std::string> makePath(std::vector<std::string> path_1, std::vector<std::string> path_2){
+    path_1.insert(path_1.end(), path_2.begin(), path_2.end());
+    return path_1;
+  }
+
 //    void publishRigidBodyTree(
 //            const RigidBodyTree<double>& tree,
 //            const Eigen::VectorXd& q,
@@ -41,6 +65,7 @@ class RemoteTreeViewerWrapper {
 //            const std::vector<std::string>& path);
 
  private:
+  std::string publish_channel_;
 
 
 };
