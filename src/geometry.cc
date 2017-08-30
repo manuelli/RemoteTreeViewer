@@ -22,24 +22,42 @@ json transformToJson(Eigen::Affine3f& transform){
   return j;
 }
 
+// default constructor for parent class sets color and alpha
+Geometry::Geometry(){
+  this->transform_ = Eigen::Affine3f::Identity();
+  this->color_ = std::vector<double>({1,1,1});
+  this->alpha_ = 1.0;
+}
+
+json Geometry::getBasicJsonString(){
+  json j;
+  std::vector<double> rgba;
+  rgba.insert(rgba.begin(), this->color_.begin(), this->color_.end());
+  rgba.push_back(this->alpha_);
+  j["color"] = rgba;
+  j["transform"] = transformToJson(this->transform_);
+  return j;
+}
+
 Sphere::Sphere(Eigen::Vector3f origin, float radius){
   this->origin_ = origin;
+  this->transform_.translation() = origin;
   this->radius_ = radius;
   this->color_ = std::vector<double>({1,1,1});
   this->alpha_ = 1.0;
 }
 
 json Sphere::getJsonString(){
-  json j;
+  json j = this->getBasicJsonString();
   j["type"] = "sphere";
   j["radius"] = this->radius_;
 
-  std::vector<double> rgba;
-  rgba.insert(rgba.begin(), this->color_.begin(), this->color_.end());
-  rgba.push_back(this->alpha_);
-  j["color"] = rgba;
-  j["transform"]["translation"] = std::vector<float>({origin_[0], origin_[1], origin_[2]});
-  j["path"] = json({});
+//  std::vector<double> rgba;
+//  rgba.insert(rgba.begin(), this->color_.begin(), this->color_.end());
+//  rgba.push_back(this->alpha_);
+//  j["color"] = rgba;
+//  j["transform"]["translation"] = std::vector<float>({origin_[0], origin_[1], origin_[2]});
+//  j["path"] = json({});
 
   return j;
 }

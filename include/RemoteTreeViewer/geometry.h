@@ -20,6 +20,11 @@ class Geometry{
   std::vector<double> color_;
   double alpha_;
   std::string name_ = "";
+  Eigen::Affine3f transform_;
+
+  Geometry();
+
+  json getBasicJsonString();
 
   virtual json getJsonString() = 0;
   void setColor(std::vector<double> color){
@@ -56,6 +61,7 @@ class Sphere : public Geometry{
   Sphere(Eigen::Vector3f origin, float radius);
   json getJsonString();
 };
+
 
 class GeometryContainer{
  public:
