@@ -66,6 +66,10 @@ GeometryContainer::GeometryContainer(){
   this->transform_ = Eigen::Affine3f::Identity();
 }
 
+GeometryContainer::GeometryContainer(const Eigen::Affine3f& transform){
+  this->setTransform(transform);
+}
+
 void GeometryContainer::setTransform(const Eigen::Affine3f& transform){
   this->transform_ = transform;
 }

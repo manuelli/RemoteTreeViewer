@@ -68,9 +68,22 @@ class GeometryContainer{
   std::vector<std::shared_ptr<Geometry>> geometries_;
   Eigen::Affine3f transform_;
   GeometryContainer();
+  GeometryContainer(const Eigen::Affine3f& transform);
+
+  /**
+   * Set the transform for the whole geometry
+   * @param transform
+   */
   void setTransform(const Eigen::Affine3f& transform);
   Eigen::Affine3f getTransform() const;
+
+  /**
+   * Add a geometry to be draw
+   * @param geometry
+   */
   void addGeometry(std::shared_ptr<Geometry> geometry);
+
+
 };
 
 }// geometry
