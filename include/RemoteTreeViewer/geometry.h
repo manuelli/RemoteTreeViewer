@@ -27,6 +27,7 @@ class Geometry{
   json getBasicJsonString();
 
   virtual json getJsonString() = 0;
+
   void setColor(std::vector<double> color){
     this->color_ = color;
   }

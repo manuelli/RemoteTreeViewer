@@ -235,6 +235,8 @@ void RemoteTreeViewerWrapper::publishGeometryContainer(RemoteTreeViewer::geometr
   j["setgeometry"] = {single_geometry_message};
 
   this->publishJson(j);
+
+//  std::cout << j << "\n\n\n";
 }
 
 //void RemoteTreeViewerWrapper::publishRigidBodyTree(const RigidBodyTree<double>& tree, const VectorXd& q, const Vector4d& color, const vector<string>& path, bool visual){

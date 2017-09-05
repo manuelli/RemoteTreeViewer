@@ -17,8 +17,6 @@ using json = nlohmann::json;
 class Box : public Geometry{
  public:
   Eigen::Vector3f dimensions_;
-  Eigen::Affine3f transform_;
-
   Box(const Eigen::Vector3f& dimensions, const Eigen::Affine3f& transform);
 
   json getJsonString();

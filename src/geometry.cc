@@ -17,7 +17,7 @@ json transformToJson(Eigen::Affine3f& transform){
 
   Eigen::Quaternionf quat(transform.linear());
 
-  j["rotation"] = std::vector<float>({quat.w(), quat.x(), quat.y(), quat.z()});
+  j["quaternion"] = std::vector<float>({quat.w(), quat.x(), quat.y(), quat.z()});
 
   return j;
 }
