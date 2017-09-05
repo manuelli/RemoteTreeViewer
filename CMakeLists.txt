@@ -23,9 +23,13 @@ set(HEADERS
 set(SOURCES
 		src/RemoteTreeViewerWrapper.cpp
 		src/geometry.cc
-		src/box.cc)
+		src/box.cc
+		src/triad.cc
+		)
 set(PUBLIC_HEADERS
 		include/)
+
+message("INCLUDE_DIRECTORIES ${INCLUDE_DIRECTORIES}")
 
 add_library(RemoteTreeViewerWrapper SHARED ${SOURCES})
 #set_target_properties(RemoteTreeViewerWrapper
