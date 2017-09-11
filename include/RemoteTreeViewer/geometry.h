@@ -84,6 +84,12 @@ class GeometryContainer{
    */
   void addGeometry(std::shared_ptr<Geometry> geometry);
 
+  /**
+   * Set the color of all geometries in this container
+   * @param color
+   */
+  void setColor(std::vector<double> color);
+
 
 };
 

@@ -82,5 +82,11 @@ Eigen::Affine3f GeometryContainer::getTransform() const{
   return this->transform_;
 }
 
+void GeometryContainer::setColor(std::vector<double> color){
+  for(int i = 0; i < this->geometries_.size(); i++){
+    this->geometries_[i]->setColor(color);
+  }
+}
+
 }// geometry
 }// RemoteTreeViewer
